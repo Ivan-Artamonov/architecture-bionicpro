@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="BionicPRO — безопасность" id="page1">
+    <mxGraphModel dx="2020" dy="1070" grid="1" gridSize="10" page="1" pageWidth="2020" pageHeight="1070" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="boundary" value="" vertex="1" parent="1" style="rounded=1;arcSize=2;fillColor=none;strokeColor=#808080;dashed=1;dashPattern=6 4;">
+          <mxGeometry as="geometry" x="590" y="25" width="1040" height="980" />
+        </mxCell>
+        <mxCell id="boundary-label" value="&lt;b&gt;BionicPRO&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System]&lt;/font&gt;" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=16;fontColor=#333333;">
+          <mxGeometry as="geometry" x="602" y="956" width="250" height="42" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="pilot" target="ui" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.6111111111111112;exitPerimeter=0;entryX=0.0;entryY=0.48148148148148145;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="ui" target="auth" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.48148148148148145;exitPerimeter=0;entryX=0.0;entryY=0.40625;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="auth" target="kc" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.46875;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="shop" target="kc" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="kc" target="ldap" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.23333333333333334;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1570" y="380" />
+              <mxPoint x="1570" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="kc" target="yandex" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.7;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1570" y="450" />
+              <mxPoint x="1570" y="635" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="auth" target="api" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.46938775510204084;exitY=1.0;exitPerimeter=0;entryX=0.46938775510204084;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="auth" target="profile" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.8163265306122449;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="900" y="595" />
+              <mxPoint x="1295" y="595" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="ui" target="chip" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="pilot" value="" vertex="1" parent="1" style="group;">
+          <mxGeometry as="geometry" x="40" y="300" width="190" height="180" />
+        </mxCell>
+        <mxCell id="pilot-body" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Пилот протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Person]&lt;/font&gt;" vertex="1" parent="pilot" style="whiteSpace=wrap;html=1;fillColor=#6b6577;strokeColor=#6b6577;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=40;">
+          <mxGeometry as="geometry" x="0" y="64" width="190" height="116" />
+        </mxCell>
+        <mxCell id="pilot-head" value="" vertex="1" parent="pilot" style="whiteSpace=wrap;html=1;fillColor=#6b6577;strokeColor=#6b6577;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;ellipse;">
+          <mxGeometry as="geometry" x="55.0" y="0" width="80" height="80" />
+        </mxCell>
+        <mxCell id="ui" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Приложение для&lt;br&gt;настройки протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: React, iOS, Android]&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="310" y="345" width="230" height="135" />
+        </mxCell>
+        <mxCell id="chip" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Программа в чипе&lt;br&gt;протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System: ESP32, C++]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Миодатчики, модель, актуаторы&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#1464af;strokeColor=#1464af;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="310" y="600" width="230" height="150" />
+        </mxCell>
+        <mxCell id="shop" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Интернет-магазин&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Битрикс24]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Региональный SSO&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1170" y="90" width="250" height="120" />
+        </mxCell>
+        <mxCell id="auth" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;bionicpro-auth&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Python]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;PKCE S256, state, nonce&lt;br&gt;Access token в памяти&lt;br&gt;Refresh token зашифрован&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="700" y="345" width="245" height="160" />
+        </mxCell>
+        <mxCell id="kc" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Keycloak&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: IAM]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;OIDC и обязательный OTP&lt;br&gt;Учётные записи региона&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1170" y="345" width="250" height="150" />
+        </mxCell>
+        <mxCell id="api" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;API отчётов&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Python]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Доступ только к своему sub&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="700" y="735" width="245" height="130" />
+        </mxCell>
+        <mxCell id="profile" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;БД профилей&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: PostgreSQL]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Профиль Яндекса&lt;br&gt;после согласия&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;shape=cylinder;size=18;boundedLbl=1;backgroundOutline=1;">
+          <mxGeometry as="geometry" x="1170" y="735" width="250" height="140" />
+        </mxCell>
+        <mxCell id="ldap" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;LDAP / внешний IdP&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Каталог представительства&lt;br&gt;в том же регионе&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#1464af;strokeColor=#1464af;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1720" y="175" width="250" height="140" />
+        </mxCell>
+        <mxCell id="yandex" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Яндекс ID&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;OAuth 2.0&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#1464af;strokeColor=#1464af;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1720" y="570" width="250" height="130" />
+        </mxCell>
+        <mxCell id="label0" value="HTTPS" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="238.0" y="391" width="64" height="20" />
+        </mxCell>
+        <mxCell id="label1" value="HTTPS&lt;br&gt;Session cookie" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="547.5" y="386" width="145" height="36" />
+        </mxCell>
+        <mxCell id="label2" value="Code + verifier&lt;br&gt;Токены по внутренней сети" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="952.0" y="397" width="210" height="36" />
+        </mxCell>
+        <mxCell id="label3" value="OIDC" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1265.0" y="268" width="60" height="20" />
+        </mxCell>
+        <mxCell id="label4" value="LDAP / OIDC" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1515.0" y="286" width="110" height="20" />
+        </mxCell>
+        <mxCell id="label5" value="Identity Brokering" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1500.0" y="528" width="140" height="20" />
+        </mxCell>
+        <mxCell id="label6" value="Проверенный sub" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="747.5" y="632" width="135" height="20" />
+        </mxCell>
+        <mxCell id="label7" value="SQL: согласие и профиль" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1020.0" y="584" width="200" height="20" />
+        </mxCell>
+        <mxCell id="label8" value="Управление протезом" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="342.5" y="535" width="165" height="20" />
+        </mxCell>
+        <mxCell id="note0" value="Cookie: HttpOnly, Secure, SameSite=Lax. Session id меняется при каждом защищённом запросе." vertex="1" parent="1" style="text;html=1;align=left;fontFamily=Arial;fontSize=12;fontColor=#555555;">
+          <mxGeometry as="geometry" x="615" y="895" width="975" height="30" />
+        </mxCell>
+        <mxCell id="note1" value="Показан один регион: персональные и медицинские данные храним в его инфраструктуре." vertex="1" parent="1" style="text;html=1;align=left;fontFamily=Arial;fontSize=12;fontColor=#555555;">
+          <mxGeometry as="geometry" x="615" y="922" width="975" height="30" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

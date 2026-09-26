@@ -1,42 +1,213 @@
-version: '3.8'
+name: sprint9
+
+x-app-env: &app-env
+  INTERNAL_KEY: local-internal-key
+  REPORT_SOURCE: ${REPORT_SOURCE:-cdc}
+  CLICKHOUSE_PASSWORD: local-clickhouse
 
 services:
-  keycloak_db:
-    image: postgres:14
+  keycloak-db:
+    image: postgres:16-alpine
     environment:
-      POSTGRES_DB: keycloak_db
-      POSTGRES_USER: keycloak_user
-      POSTGRES_PASSWORD: keycloak_password
-    volumes:
-      - ./postgres-keycloak-data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: local-keycloak
+    volumes: [keycloak-data:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U keycloak]
+      interval: 5s
+      retries: 20
+
   keycloak:
-    image: quay.io/keycloak/keycloak:21.1
+    build: ./keycloak
+    command: [start-dev, --import-realm]
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloak_db:5432/keycloak_db
-      KC_DB_USERNAME: keycloak_user
-      KC_DB_PASSWORD: keycloak_password
-    command: 
-      - start-dev
-      - --import-realm
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: local-keycloak
+      KC_HOSTNAME: https://localhost:8443/id
+      KC_HTTP_RELATIVE_PATH: /id
+      KC_PROXY_HEADERS: xforwarded
+      YANDEX_CLIENT_ID: ${YANDEX_CLIENT_ID:-not-configured}
+      YANDEX_CLIENT_SECRET: ${YANDEX_CLIENT_SECRET:-not-configured}
     volumes:
-      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
-    ports:
-      - "8080:8080"
+      - ./keycloak/keycloak-results-export.json:/opt/keycloak/data/import/bionic.json:ro
     depends_on:
-      - keycloak_db
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
+      keycloak-db: {condition: service_healthy}
+      openldap: {condition: service_started}
+
+  openldap:
+    image: osixia/openldap:1.5.0
+    command: [--copy-service]
     environment:
-      REACT_APP_API_URL: http://localhost:8000
-      REACT_APP_KEYCLOAK_URL: http://localhost:8080
-      REACT_APP_KEYCLOAK_REALM: reports-realm
-      REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+      LDAP_ORGANISATION: BionicPRO
+      LDAP_DOMAIN: example.com
+      LDAP_ADMIN_PASSWORD: local-ldap
+      LDAP_TLS: 'false'
+    volumes:
+      - ./ldap/config.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-users.ldif:ro
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+
+  crm-db:
+    image: postgres:16-alpine
+    command: [postgres, -c, wal_level=logical, -c, max_replication_slots=4, -c, max_wal_senders=4]
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: crm
+      POSTGRES_PASSWORD: local-crm
+    volumes:
+      - crm-data:/var/lib/postgresql/data
+      - ./postgres/crm.sql:/docker-entrypoint-initdb.d/01-crm.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U crm]
+      interval: 5s
+      retries: 20
+
+  telemetry-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: telemetry
+      POSTGRES_USER: telemetry
+      POSTGRES_PASSWORD: local-telemetry
+    volumes:
+      - telemetry-data:/var/lib/postgresql/data
+      - ./postgres/telemetry.sql:/docker-entrypoint-initdb.d/01-telemetry.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U telemetry]
+      interval: 5s
+      retries: 20
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.3
+    environment:
+      CLICKHOUSE_DB: bionic
+      CLICKHOUSE_USER: bionic
+      CLICKHOUSE_PASSWORD: local-clickhouse
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./clickhouse/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: [CMD, clickhouse-client, --user, bionic, --password, local-clickhouse, --query, SELECT 1]
+      interval: 5s
+      retries: 30
+
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_NUM_PARTITIONS: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xmx512m -Xms256m
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    volumes: [kafka-data:/var/lib/kafka/data]
+    healthcheck:
+      test: [CMD-SHELL, /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list]
+      interval: 10s
+      retries: 30
+
+  kafka-connect:
+    image: quay.io/debezium/connect:3.0.8.Final
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: bionic-connect
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      HEAP_OPTS: -Xms256m -Xmx512m
+    depends_on:
+      kafka: {condition: service_healthy}
+      crm-db: {condition: service_healthy}
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin-local
+    volumes: [minio-data:/data]
+
+  reports-api:
+    build: ./reports-api
+    environment: *app-env
+    volumes:
+      - ./clickhouse:/config/clickhouse:ro
+      - ./debezium:/config/debezium:ro
+    depends_on:
+      clickhouse: {condition: service_healthy}
+      minio: {condition: service_started}
+
+  bionicpro-auth:
+    build: ./bionicpro-auth
+    environment:
+      <<: *app-env
+      PROFILE_DSN: postgresql://profile_app:local-profile@crm-db:5432/crm
+    depends_on:
+      crm-db: {condition: service_healthy}
+      keycloak: {condition: service_started}
+
+  airflow:
+    build: ./airflow
+    command: standalone
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__PARALLELISM: 2
+      AIRFLOW__SCHEDULER__PARSING_PROCESSES: 1
+      AIRFLOW__WEBSERVER__WORKERS: 1
+      AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: 60
+      REPORT_SOURCE: ${REPORT_SOURCE:-cdc}
+      TELEMETRY_DSN: postgresql://etl_reader:local-etl@telemetry-db:5432/telemetry
+      CRM_DSN: postgresql://etl_reader:local-etl@crm-db:5432/crm
+    volumes:
+      - airflow-data:/opt/airflow
+      - ./airflow/dags:/opt/airflow/dags:ro
+      - ./clickhouse:/opt/airflow/sql:ro
+    ports: ['127.0.0.1:8089:8080']
+    healthcheck:
+      test: [CMD-SHELL, curl --fail --silent http://localhost:8080/health >/dev/null]
+      interval: 10s
+      start_period: 40s
+      retries: 30
+    depends_on:
+      telemetry-db: {condition: service_healthy}
+      clickhouse: {condition: service_healthy}
+
+  frontend:
+    build: ./frontend
+
+  nginx:
+    image: nginx:1.28-alpine
+    ports: ['127.0.0.1:8443:443']
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on: [frontend, bionicpro-auth, reports-api, keycloak]
+
+volumes:
+  keycloak-data:
+  ldap-data:
+  ldap-config:
+  crm-data:
+  telemetry-data:
+  clickhouse-data:
+  kafka-data:
+  minio-data:
+  airflow-data:

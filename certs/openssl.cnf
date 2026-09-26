@@ -1,0 +1,8 @@
+[req]
+distinguished_name = dn
+x509_extensions = extensions
+prompt = no
+[dn]
+CN = localhost
+[extensions]
+subjectAltName = DNS:localhost,IP:127.0.0.1

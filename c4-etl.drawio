@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" type="device">
+  <diagram name="BionicPRO — отчёты и ETL" id="page1">
+    <mxGraphModel dx="2020" dy="1150" grid="1" gridSize="10" page="1" pageWidth="2020" pageHeight="1150" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="boundary" value="" vertex="1" parent="1" style="rounded=1;arcSize=2;fillColor=none;strokeColor=#808080;dashed=1;dashPattern=6 4;">
+          <mxGeometry as="geometry" x="575" y="30" width="1395" height="1060" />
+        </mxCell>
+        <mxCell id="boundary-label" value="&lt;b&gt;BionicPRO&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System]&lt;/font&gt;" vertex="1" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Arial;fontSize=16;fontColor=#333333;">
+          <mxGeometry as="geometry" x="587" y="1041" width="250" height="42" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="pilot" target="ui" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.65;exitPerimeter=0;entryX=0.0;entryY=0.4962962962962963;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="ui" target="auth" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.4962962962962963;exitPerimeter=0;entryX=0.0;entryY=0.4962962962962963;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="auth" target="api" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.4962962962962963;exitPerimeter=0;entryX=0.0;entryY=0.4962962962962963;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="crm" target="crmdb" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.4962962962962963;exitPerimeter=0;entryX=0.0;entryY=0.5133333333333333;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="crmdb" target="airflow" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.5;exitY=1.0;exitPerimeter=0;entryX=0.0;entryY=0.34375;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1230" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="db" target="airflow" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.5;entryY=1.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1500" y="955" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="airflow" target="olap" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=0.5;exitY=0.0;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1500" y="550" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="api" target="olap" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.4962962962962963;exitPerimeter=0;entryX=0.5;entryY=0.0;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1">
+            <Array as="points">
+              <mxPoint x="1810" y="197" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="chip" target="ingest" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ingest" target="db" style="rounded=0;html=1;endArrow=classic;endFill=1;strokeColor=#222222;strokeWidth=1;exitX=1.0;exitY=0.5;exitPerimeter=0;entryX=0.0;entryY=0.5;entryPerimeter=0;">
+          <mxGeometry as="geometry" relative="1" />
+        </mxCell>
+        <mxCell id="pilot" value="" vertex="1" parent="1" style="group;">
+          <mxGeometry as="geometry" x="30" y="80" width="190" height="180" />
+        </mxCell>
+        <mxCell id="pilot-body" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Пилот протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Person]&lt;/font&gt;" vertex="1" parent="pilot" style="whiteSpace=wrap;html=1;fillColor=#6b6577;strokeColor=#6b6577;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=40;">
+          <mxGeometry as="geometry" x="0" y="64" width="190" height="116" />
+        </mxCell>
+        <mxCell id="pilot-head" value="" vertex="1" parent="pilot" style="whiteSpace=wrap;html=1;fillColor=#6b6577;strokeColor=#6b6577;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;ellipse;">
+          <mxGeometry as="geometry" x="55.0" y="0" width="80" height="80" />
+        </mxCell>
+        <mxCell id="ui" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Приложение для&lt;br&gt;настройки протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: React, iOS, Android]&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="300" y="130" width="230" height="135" />
+        </mxCell>
+        <mxCell id="auth" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;bionicpro-auth&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Python]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Сессия → sub&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="680" y="130" width="240" height="135" />
+        </mxCell>
+        <mxCell id="api" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;API /reports&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Python]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Готовый отчёт пользователя&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1110" y="130" width="240" height="135" />
+        </mxCell>
+        <mxCell id="crm" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;CRM&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Битрикс24]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Клиенты и заказы&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="680" y="435" width="240" height="135" />
+        </mxCell>
+        <mxCell id="crmdb" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;CRM DB&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: PostgreSQL]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;clients: id, sub, имя&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;shape=cylinder;size=18;boundedLbl=1;backgroundOutline=1;">
+          <mxGeometry as="geometry" x="1110" y="425" width="240" height="150" />
+        </mxCell>
+        <mxCell id="airflow" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Airflow DAG&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: Python]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Каждый час&lt;br&gt;Снимок источников&lt;br&gt;Публикация витрины&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="1380" y="735" width="240" height="160" />
+        </mxCell>
+        <mxCell id="olap" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Витрина отчётов&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: ClickHouse]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;reports_etl&lt;br&gt;Агрегаты по sub и дню&lt;br&gt;Версия и граница обработки&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;shape=cylinder;size=18;boundedLbl=1;backgroundOutline=1;">
+          <mxGeometry as="geometry" x="1690" y="460" width="240" height="180" />
+        </mxCell>
+        <mxCell id="chip" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;Программа в чипе&lt;br&gt;протеза&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Software System: ESP32, C++]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Телеметрия&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#1464af;strokeColor=#1464af;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="300" y="885" width="230" height="140" />
+        </mxCell>
+        <mxCell id="ingest" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;API сбора телеметрии&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;Исходный сервис BionicPRO&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;rounded=1;arcSize=10;">
+          <mxGeometry as="geometry" x="650" y="885" width="240" height="140" />
+        </mxCell>
+        <mxCell id="db" value="&lt;b&gt;&lt;font style=&quot;font-size:16px&quot;&gt;База телеметрии&lt;/font&gt;&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;[Container: PostgreSQL]&lt;/font&gt;&lt;br&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;События протезов&lt;/font&gt;" vertex="1" parent="1" style="whiteSpace=wrap;html=1;fillColor=#21a2d0;strokeColor=#21a2d0;fontColor=#ffffff;fontFamily=Arial;fontSize=12;align=center;verticalAlign=middle;spacing=8;shape=cylinder;size=18;boundedLbl=1;backgroundOutline=1;">
+          <mxGeometry as="geometry" x="1050" y="880" width="240" height="150" />
+        </mxCell>
+        <mxCell id="label0" value="Отчёт" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="227.0" y="182" width="66" height="20" />
+        </mxCell>
+        <mxCell id="label1" value="Session cookie" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="540.0" y="182" width="130" height="20" />
+        </mxCell>
+        <mxCell id="label2" value="Проверенный sub" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="937.5" y="182" width="155" height="20" />
+        </mxCell>
+        <mxCell id="label3" value="SQL" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="985.0" y="487" width="60" height="20" />
+        </mxCell>
+        <mxCell id="label4" value="Extract: клиенты" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1160.0" y="675" width="140" height="20" />
+        </mxCell>
+        <mxCell id="label5" value="Extract: телеметрия" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1317.5" y="939" width="165" height="20" />
+        </mxCell>
+        <mxCell id="label6" value="Transform + load" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1427.5" y="655" width="145" height="20" />
+        </mxCell>
+        <mxCell id="label7" value="Готовые строки" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="1737.5" y="340" width="145" height="20" />
+        </mxCell>
+        <mxCell id="label8" value="4G" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="565.0" y="940" width="50" height="20" />
+        </mxCell>
+        <mxCell id="label9" value="Запись" vertex="1" parent="1" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontFamily=Arial;fontSize=12;fontColor=#222222;fillColor=#ffffff;spacing=0;">
+          <mxGeometry as="geometry" x="930.0" y="940" width="80" height="20" />
+        </mxCell>
+        <mxCell id="note0" value="REPORT_SOURCE=etl. Только завершённые дни UTC; необработанный период → 409. Источники в стенде — учебные данные." vertex="1" parent="1" style="text;html=1;align=left;fontFamily=Arial;fontSize=12;fontColor=#555555;">
+          <mxGeometry as="geometry" x="600" y="1102" width="1300" height="30" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

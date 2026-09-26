@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2020" height="1070" viewBox="0 0 2020 1070">
+<title>BionicPRO — безопасность</title>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 L2,4 Z" fill="#222222"/></marker></defs>
+<rect width="2020" height="1070" fill="white"/>
+<rect x="590" y="25" width="1040" height="980" rx="12" fill="none" stroke="#808080" stroke-dasharray="7 5"/>
+<text x="602" y="977" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#222222">BionicPRO</text>
+<text x="602" y="994" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">[Software System]</text>
+<path d="M230,410 L310,410" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M540,410 L700,410" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M945,420 L1170,420" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M1295,210 L1295,345" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M1420,380 L1570,380 L1570,245 L1720,245" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M1420,450 L1570,450 L1570,635 L1720,635" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M815,505 L815,735" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M900,505 L900,595 L1295,595 L1295,735" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M425,480 L425,600" fill="none" stroke="#222222" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="40" y="364" width="190" height="116" rx="38" fill="#6b6577" stroke="#56515d" stroke-width="0.8"/><circle cx="135.0" cy="340" r="40" fill="#6b6577" stroke="#56515d" stroke-width="0.8"/>
+<text x="135.0" y="421.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Пилот протеза</text>
+<text x="135.0" y="436.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Person]</text>
+<rect x="310" y="345" width="230" height="135" rx="12" fill="#21a2d0" stroke="#21a2d0"/>
+<text x="425.0" y="402.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Приложение для</text>
+<text x="425.0" y="421.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">настройки протеза</text>
+<text x="425.0" y="436.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: React, iOS, Android]</text>
+<rect x="310" y="600" width="230" height="150" rx="12" fill="#1464af" stroke="#1464af"/>
+<text x="425.0" y="651.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Программа в чипе</text>
+<text x="425.0" y="670.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">протеза</text>
+<text x="425.0" y="685.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Software System: ESP32, C++]</text>
+<text x="425.0" y="697.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="425.0" y="712.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Миодатчики, модель, актуаторы</text>
+<rect x="1170" y="90" width="250" height="120" rx="12" fill="#21a2d0" stroke="#21a2d0"/>
+<text x="1295.0" y="135.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Интернет-магазин</text>
+<text x="1295.0" y="150.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: Битрикс24]</text>
+<text x="1295.0" y="162.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="1295.0" y="177.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Региональный SSO</text>
+<rect x="700" y="345" width="245" height="160" rx="12" fill="#21a2d0" stroke="#21a2d0"/>
+<text x="822.5" y="395.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">bionicpro-auth</text>
+<text x="822.5" y="410.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: Python]</text>
+<text x="822.5" y="422.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="822.5" y="437.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">PKCE S256, state, nonce</text>
+<text x="822.5" y="452.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Access token в памяти</text>
+<text x="822.5" y="467.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Refresh token зашифрован</text>
+<rect x="1170" y="345" width="250" height="150" rx="12" fill="#21a2d0" stroke="#21a2d0"/>
+<text x="1295.0" y="398.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Keycloak</text>
+<text x="1295.0" y="413.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: IAM]</text>
+<text x="1295.0" y="425.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="1295.0" y="440.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">OIDC и обязательный OTP</text>
+<text x="1295.0" y="455.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Учётные записи региона</text>
+<rect x="700" y="735" width="245" height="130" rx="12" fill="#21a2d0" stroke="#21a2d0"/>
+<text x="822.5" y="785.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">API отчётов</text>
+<text x="822.5" y="800.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: Python]</text>
+<text x="822.5" y="812.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="822.5" y="827.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Доступ только к своему sub</text>
+<path d="M1170,753 A125.0,18 0 0 1 1420,753 V857 A125.0,18 0 0 1 1170,857 Z" fill="#21a2d0" stroke="#1885ae"/><ellipse cx="1295.0" cy="753" rx="125.0" ry="18" fill="#21a2d0" stroke="#1885ae"/>
+<text x="1295.0" y="791.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">БД профилей</text>
+<text x="1295.0" y="806.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Container: PostgreSQL]</text>
+<text x="1295.0" y="818.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="1295.0" y="833.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Профиль Яндекса</text>
+<text x="1295.0" y="848.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">после согласия</text>
+<rect x="1720" y="175" width="250" height="140" rx="12" fill="#1464af" stroke="#1464af"/>
+<text x="1845.0" y="223.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">LDAP / внешний IdP</text>
+<text x="1845.0" y="238.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Software System]</text>
+<text x="1845.0" y="250.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="1845.0" y="265.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">Каталог представительства</text>
+<text x="1845.0" y="280.0" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">в том же регионе</text>
+<rect x="1720" y="570" width="250" height="130" rx="12" fill="#1464af" stroke="#1464af"/>
+<text x="1845.0" y="620.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Яндекс ID</text>
+<text x="1845.0" y="635.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">[Software System]</text>
+<text x="1845.0" y="647.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" font-weight="400" fill="#ffffff"></text>
+<text x="1845.0" y="662.5" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#ffffff">OAuth 2.0</text>
+<rect x="247.0" y="391" width="46.0" height="20" fill="white"/>
+<text x="270" y="405" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">HTTPS</text>
+<rect x="566.4" y="386" width="107.2" height="36" fill="white"/>
+<text x="620" y="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">HTTPS</text>
+<text x="620" y="416" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Session cookie</text>
+<rect x="966.0" y="397" width="182.0" height="36" fill="white"/>
+<text x="1057" y="411" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Code + verifier</text>
+<text x="1057" y="427" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Токены по внутренней сети</text>
+<rect x="1275.4" y="268" width="39.2" height="20" fill="white"/>
+<text x="1295" y="282" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">OIDC</text>
+<rect x="1526.6" y="286" width="86.8" height="20" fill="white"/>
+<text x="1570" y="300" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">LDAP / OIDC</text>
+<rect x="1502.8" y="528" width="134.39999999999998" height="20" fill="white"/>
+<text x="1570" y="542" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Identity Brokering</text>
+<rect x="758.0" y="632" width="114.0" height="20" fill="white"/>
+<text x="815" y="646" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Проверенный sub</text>
+<rect x="1035.8" y="584" width="168.4" height="20" fill="white"/>
+<text x="1120" y="598" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">SQL: согласие и профиль</text>
+<rect x="354.4" y="535" width="141.2" height="20" fill="white"/>
+<text x="425" y="549" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#222222">Управление протезом</text>
+<text x="615" y="914" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#555555">Cookie: HttpOnly, Secure, SameSite=Lax. Session id меняется при каждом защищённом запросе.</text>
+<text x="615" y="941" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="400" fill="#555555">Показан один регион: персональные и медицинские данные храним в его инфраструктуре.</text>
+</svg>
