@@ -1,2 +1,6 @@
-/postgres-keycloak-data
-2024__yandex-architecture-sso.code-workspace
+.env
+__pycache__/
+*.pyc
+node_modules/
+build/
+.airflow/
