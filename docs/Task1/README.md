@@ -11,3 +11,7 @@
 Keycloak подключает местный LDAP через **User Federation**, внешние IdP через **Identity Brokering**. Приложения
 используют отдельные OIDC-клиенты одного регионального Keycloak.
 
+## Часть 2. PKCE в React и Keycloak
+
+В React включён Authorization Code + PKCE S256, в Keycloak S256 обязателен. Implicit и Direct Access Grant отключены.
+
