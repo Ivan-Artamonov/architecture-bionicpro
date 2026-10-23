@@ -116,6 +116,104 @@
         "realmRoles": ["prothetic_user"]
       }
     ],
+    "components": {
+      "org.keycloak.storage.UserStorageProvider": [
+        {
+          "id": "bionicpro-foreign-ldap",
+          "name": "foreign-office-ldap",
+          "providerId": "ldap",
+          "config": {
+            "enabled": ["true"],
+            "priority": ["0"],
+            "vendor": ["other"],
+            "editMode": ["READ_ONLY"],
+            "importEnabled": ["true"],
+            "syncRegistrations": ["false"],
+            "connectionUrl": ["ldap://openldap:389"],
+            "startTls": ["false"],
+            "authType": ["simple"],
+            "bindDn": ["cn=readonly,dc=example,dc=com"],
+            "bindCredential": ["${LDAP_READONLY_PASSWORD}"],
+            "usersDn": ["ou=People,dc=example,dc=com"],
+            "usernameLDAPAttribute": ["uid"],
+            "rdnLDAPAttribute": ["uid"],
+            "uuidLDAPAttribute": ["entryUUID"],
+            "userObjectClasses": ["inetOrgPerson"],
+            "searchScope": ["2"],
+            "pagination": ["true"],
+            "connectionTimeout": ["5000"],
+            "readTimeout": ["5000"],
+            "cachePolicy": ["NO_CACHE"],
+            "fullSyncPeriod": ["-1"],
+            "changedSyncPeriod": ["-1"]
+          },
+          "subComponents": {
+            "org.keycloak.storage.ldap.mappers.LDAPStorageMapper": [
+              {
+                "name": "username",
+                "providerId": "user-attribute-ldap-mapper",
+                "config": {
+                  "user.model.attribute": ["username"],
+                  "ldap.attribute": ["uid"],
+                  "read.only": ["true"],
+                  "always.read.value.from.ldap": ["false"],
+                  "is.mandatory.in.ldap": ["true"]
+                }
+              },
+              {
+                "name": "first name",
+                "providerId": "user-attribute-ldap-mapper",
+                "config": {
+                  "user.model.attribute": ["firstName"],
+                  "ldap.attribute": ["cn"],
+                  "read.only": ["true"],
+                  "always.read.value.from.ldap": ["true"],
+                  "is.mandatory.in.ldap": ["true"]
+                }
+              },
+              {
+                "name": "last name",
+                "providerId": "user-attribute-ldap-mapper",
+                "config": {
+                  "user.model.attribute": ["lastName"],
+                  "ldap.attribute": ["sn"],
+                  "read.only": ["true"],
+                  "always.read.value.from.ldap": ["true"],
+                  "is.mandatory.in.ldap": ["true"]
+                }
+              },
+              {
+                "name": "email",
+                "providerId": "user-attribute-ldap-mapper",
+                "config": {
+                  "user.model.attribute": ["email"],
+                  "ldap.attribute": ["mail"],
+                  "read.only": ["true"],
+                  "always.read.value.from.ldap": ["true"],
+                  "is.mandatory.in.ldap": ["false"]
+                }
+              },
+              {
+                "name": "regional-realm-roles",
+                "providerId": "role-ldap-mapper",
+                "config": {
+                  "roles.dn": ["ou=Groups,dc=example,dc=com"],
+                  "role.name.ldap.attribute": ["cn"],
+                  "role.object.classes": ["groupOfNames"],
+                  "roles.ldap.filter": ["(|(cn=user)(cn=prothetic_user))"],
+                  "membership.ldap.attribute": ["member"],
+                  "membership.attribute.type": ["DN"],
+                  "membership.user.ldap.attribute": ["uid"],
+                  "mode": ["READ_ONLY"],
+                  "user.roles.retrieve.strategy": ["LOAD_ROLES_BY_MEMBER_ATTRIBUTE"],
+                  "use.realm.roles.mapping": ["true"]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
     "clients": [
       {
         "clientId": "reports-frontend",

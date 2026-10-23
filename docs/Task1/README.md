@@ -28,3 +28,16 @@ React работает только с HttpOnly-cookie (`credentials: 'include'`
   `openssl rand -base64 32`.
 - Запустите `docker compose up -d --build` → `http://localhost:3000`.
 - Настройки существующего realm примените вручную из `keycloak/realm-export.json`.
+
+## Часть 4. LDAP и роли представительства
+
+OpenLDAP разворачивается через [Compose](../../docker-compose.yaml), пользователи и группы в [LDIF](../../ldap/config.ldif).
+
+Keycloak проверяет пароли в LDAP и сопоставляет группы с ролями: `jane.smith` → `user`,
+`john.doe` и `alex.johnson` → `prothetic_user`. Тестовый пароль — `password`. Доступ к LDAP — только на чтение.
+
+**Запуск:** заполните три LDAP-пароля в `.env` по `.env.example` (`openssl rand -hex 32` для каждого),
+затем `docker compose up -d --build`. Для существующего realm добавьте LDAP-провайдер и маппер ролей
+из `components` в `keycloak/realm-export.json`, выполните **Sync all users**.
+
+LDAP и Keycloak размещаются в одной стране, пользовательские данные между странами не реплицируются.

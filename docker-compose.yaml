@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  openldap:
+    image: osixia/openldap:1.5.0
+    command: ["--copy-service"]
+    environment:
+      LDAP_ORGANISATION: BionicPRO foreign office
+      LDAP_DOMAIN: example.com
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:?Set LDAP_ADMIN_PASSWORD in .env}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD:?Set LDAP_CONFIG_PASSWORD in .env}
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_PASSWORD: ${LDAP_READONLY_PASSWORD:?Set LDAP_READONLY_PASSWORD in .env}
+      # Local Docker stand only; use trusted LDAPS/StartTLS outside the stand.
+      LDAP_TLS: "false"
+    volumes:
+      - ./ldap/config.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-users.ldif:ro
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "", "-s", "base", "namingContexts"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
   keycloak_db:
     image: postgres:14
     environment:
@@ -22,6 +43,7 @@ services:
       KC_DB_PASSWORD: keycloak_password
       KC_HOSTNAME_URL: http://localhost:8080
       BIONICPRO_AUTH_CLIENT_SECRET: ${BIONICPRO_AUTH_CLIENT_SECRET:?Set BIONICPRO_AUTH_CLIENT_SECRET in .env}
+      LDAP_READONLY_PASSWORD: ${LDAP_READONLY_PASSWORD:?Set LDAP_READONLY_PASSWORD in .env}
     command: 
       - start-dev
       - --import-realm
@@ -30,7 +52,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - keycloak_db
+      keycloak_db:
+        condition: service_started
+      openldap:
+        condition: service_healthy
   auth-redis:
     image: redis:7-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no"]
@@ -63,3 +88,7 @@ services:
       - "3000:3000"
     depends_on:
       - bionicpro-auth
+
+volumes:
+  ldap-data:
+  ldap-config:
