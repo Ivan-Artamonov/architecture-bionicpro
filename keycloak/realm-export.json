@@ -8,6 +8,68 @@
     "clientSessionMaxLifespan": 28800,
     "revokeRefreshToken": true,
     "refreshTokenMaxReuse": 0,
+    "otpPolicyType": "totp",
+    "otpPolicyAlgorithm": "HmacSHA1",
+    "otpPolicyDigits": 6,
+    "otpPolicyPeriod": 30,
+    "otpPolicyLookAheadWindow": 1,
+    "otpPolicyCodeReusable": false,
+    "otpSupportedApplications": ["totpAppGoogleName", "totpAppFreeOTPName"],
+    "browserFlow": "bionicpro-browser-mfa",
+    "authenticationFlows": [
+      {
+        "alias": "bionicpro-browser-mfa",
+        "description": "SSO or password and mandatory OTP",
+        "providerId": "basic-flow",
+        "topLevel": true,
+        "builtIn": false,
+        "authenticationExecutions": [
+          {
+            "authenticator": "auth-cookie",
+            "requirement": "ALTERNATIVE",
+            "priority": 10,
+            "authenticatorFlow": false
+          },
+          {
+            "flowAlias": "bionicpro-mfa-forms",
+            "requirement": "ALTERNATIVE",
+            "priority": 20,
+            "authenticatorFlow": true
+          }
+        ]
+      },
+      {
+        "alias": "bionicpro-mfa-forms",
+        "providerId": "basic-flow",
+        "topLevel": false,
+        "builtIn": false,
+        "authenticationExecutions": [
+          {
+            "authenticator": "auth-username-password-form",
+            "requirement": "REQUIRED",
+            "priority": 10,
+            "authenticatorFlow": false
+          },
+          {
+            "authenticator": "auth-otp-form",
+            "requirement": "REQUIRED",
+            "priority": 20,
+            "authenticatorFlow": false
+          }
+        ]
+      }
+    ],
+    "requiredActions": [
+      {
+        "alias": "CONFIGURE_TOTP",
+        "name": "Configure OTP",
+        "providerId": "CONFIGURE_TOTP",
+        "enabled": true,
+        "defaultAction": true,
+        "priority": 10,
+        "config": {}
+      }
+    ],
     "roles": {
       "realm": [
         {

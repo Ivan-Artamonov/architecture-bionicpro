@@ -198,3 +198,13 @@ def test_realm_configuration():
     assert not client["publicClient"] and not client["directAccessGrantsEnabled"]
     assert client["attributes"]["pkce.code.challenge.method"] == "S256"
     assert client["redirectUris"] == ["http://localhost:3000/auth/callback"]
+    assert realm["otpPolicyType"] == "totp" and realm["otpPolicyDigits"] == 6
+    assert realm["otpPolicyPeriod"] == 30
+    assert realm["otpPolicyAlgorithm"] == "HmacSHA1" and not realm["otpPolicyCodeReusable"]
+    flows = {flow["alias"]: flow for flow in realm["authenticationFlows"]}
+    browser = flows[realm["browserFlow"]]
+    forms = flows[next(e["flowAlias"] for e in browser["authenticationExecutions"] if e["authenticatorFlow"])]
+    otp = next(e for e in forms["authenticationExecutions"] if e["authenticator"] == "auth-otp-form")
+    assert otp["requirement"] == "REQUIRED"
+    configure = next(a for a in realm["requiredActions"] if a["alias"] == "CONFIGURE_TOTP")
+    assert configure["enabled"] and configure["defaultAction"]
