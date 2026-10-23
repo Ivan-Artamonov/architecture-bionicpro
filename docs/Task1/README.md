@@ -13,5 +13,18 @@ Keycloak подключает местный LDAP через **User Federation**
 
 ## Часть 2. PKCE в React и Keycloak
 
-В React включён Authorization Code + PKCE S256, в Keycloak S256 обязателен. Implicit и Direct Access Grant отключены.
+PKCE S256 обязателен в Keycloak; после части 3 обработка code/verifier перенесена из React в BFF.
+Implicit и Direct Access Grant отключены.
 
+## Часть 3. Серверные токены и сессии
+
+`bionicpro-auth` получает и обновляет токены через Keycloak. Access token и refresh token хранятся в Redis в памяти.
+React работает только с HttpOnly-cookie (`credentials: 'include'`).
+При каждом защищённом запросе сервис перепривязывает токены к новому session ID и обновляет cookie, сразу инвалидируя старый ID, даже если access token ещё действителен.
+
+**Запуск:**
+
+- Cоздайте `.env` по `.env.example` (`chmod 600 .env`): secret `openssl rand -hex 32`, ключ
+  `openssl rand -base64 32`.
+- Запустите `docker compose up -d --build` → `http://localhost:3000`.
+- Настройки существующего realm примените вручную из `keycloak/realm-export.json`.

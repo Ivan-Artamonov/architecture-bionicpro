@@ -1,6 +1,13 @@
 {
     "realm": "reports-realm",
     "enabled": true,
+    "accessTokenLifespan": 120,
+    "ssoSessionIdleTimeout": 1800,
+    "ssoSessionMaxLifespan": 28800,
+    "clientSessionIdleTimeout": 1800,
+    "clientSessionMaxLifespan": 28800,
+    "revokeRefreshToken": true,
+    "refreshTokenMaxReuse": 0,
     "roles": {
       "realm": [
         {
@@ -112,7 +119,7 @@
     "clients": [
       {
         "clientId": "reports-frontend",
-        "enabled": true,
+        "enabled": false,
         "protocol": "openid-connect",
         "publicClient": true,
         "redirectUris": ["http://localhost:3000/*"],
@@ -123,6 +130,37 @@
         "attributes": {
           "pkce.code.challenge.method": "S256"
         }
+      },
+      {
+        "clientId": "bionicpro-auth",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "publicClient": false,
+        "clientAuthenticatorType": "client-secret",
+        "secret": "${BIONICPRO_AUTH_CLIENT_SECRET}",
+        "redirectUris": ["http://localhost:3000/auth/callback"],
+        "webOrigins": [],
+        "standardFlowEnabled": true,
+        "implicitFlowEnabled": false,
+        "directAccessGrantsEnabled": false,
+        "serviceAccountsEnabled": false,
+        "attributes": {
+          "pkce.code.challenge.method": "S256",
+          "access.token.lifespan": "120",
+          "use.refresh.tokens": "true"
+        },
+        "protocolMappers": [
+          {
+            "name": "reports-api-audience",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-audience-mapper",
+            "config": {
+              "included.client.audience": "reports-api",
+              "access.token.claim": "true",
+              "id.token.claim": "false"
+            }
+          }
+        ]
       },
       {
         "clientId": "reports-api",
