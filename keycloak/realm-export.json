@@ -31,6 +31,12 @@
             "authenticatorFlow": false
           },
           {
+            "authenticator": "identity-provider-redirector",
+            "requirement": "ALTERNATIVE",
+            "priority": 15,
+            "authenticatorFlow": false
+          },
+          {
             "flowAlias": "bionicpro-mfa-forms",
             "requirement": "ALTERNATIVE",
             "priority": 20,
@@ -57,7 +63,63 @@
             "authenticatorFlow": false
           }
         ]
+      },
+      {
+        "alias": "bionicpro-first-broker-login",
+        "providerId": "basic-flow",
+        "topLevel": true,
+        "builtIn": false,
+        "authenticationExecutions": [
+          {
+            "authenticator": "idp-create-user-if-unique",
+            "requirement": "REQUIRED",
+            "priority": 10,
+            "authenticatorFlow": false
+          }
+        ]
+      },
+      {
+        "alias": "bionicpro-broker-mfa",
+        "providerId": "basic-flow",
+        "topLevel": true,
+        "builtIn": false,
+        "authenticationExecutions": [
+          {
+            "authenticator": "auth-otp-form",
+            "requirement": "REQUIRED",
+            "priority": 10,
+            "authenticatorFlow": false
+          }
+        ]
       }
+    ],
+    "identityProviders": [
+      {
+        "alias": "yandex",
+        "displayName": "Яндекс ID",
+        "providerId": "yandex",
+        "enabled": true,
+        "trustEmail": false,
+        "storeToken": true,
+        "addReadTokenRoleOnCreate": true,
+        "firstBrokerLoginFlowAlias": "bionicpro-first-broker-login",
+        "postBrokerLoginFlowAlias": "bionicpro-broker-mfa",
+        "config": {
+          "clientId": "${YANDEX_CLIENT_ID}",
+          "clientSecret": "${YANDEX_CLIENT_SECRET}",
+          "authorizationUrl": "https://oauth.yandex.ru/authorize",
+          "tokenUrl": "https://oauth.yandex.ru/token",
+          "userInfoUrl": "https://login.yandex.ru/info?format=json",
+          "defaultScope": "login:info login:email",
+          "syncMode": "IMPORT"
+        }
+      }
+    ],
+    "clientScopeMappings": {
+      "broker": [{"client": "bionicpro-auth", "roles": ["read-token"]}]
+    },
+    "scopeMappings": [
+      {"client": "bionicpro-auth", "roles": ["user", "administrator", "prothetic_user"]}
     ],
     "requiredActions": [
       {
@@ -293,6 +355,7 @@
       },
       {
         "clientId": "bionicpro-auth",
+        "fullScopeAllowed": false,
         "enabled": true,
         "protocol": "openid-connect",
         "publicClient": false,
@@ -310,6 +373,30 @@
           "use.refresh.tokens": "true"
         },
         "protocolMappers": [
+          {
+            "name": "identity-provider",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usersessionmodel-note-mapper",
+            "config": {
+              "user.session.note": "identity_provider",
+              "claim.name": "identity_provider",
+              "jsonType.label": "String",
+              "id.token.claim": "true",
+              "access.token.claim": "false"
+            }
+          },
+          {
+            "name": "yandex-id",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usersessionmodel-note-mapper",
+            "config": {
+              "user.session.note": "yandex_id",
+              "claim.name": "yandex_id",
+              "jsonType.label": "String",
+              "id.token.claim": "true",
+              "access.token.claim": "false"
+            }
+          },
           {
             "name": "reports-api-audience",
             "protocol": "openid-connect",

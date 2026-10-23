@@ -14,6 +14,7 @@ class Settings:
     redis_url: str = "redis://auth-redis:6379/0"
     redis_prefix: str = "bionicpro:"
     api_url: str = ""
+    profiles_database_url: str = ""
     cookie_secure: bool = True
     idle_seconds: int = 1800
     absolute_seconds: int = 28800
@@ -41,5 +42,6 @@ class Settings:
             keycloak_internal=os.getenv("KEYCLOAK_INTERNAL_URL", "http://keycloak:8080/realms/reports-realm").rstrip("/"),
             redis_url=os.getenv("REDIS_URL", "redis://auth-redis:6379/0"),
             api_url=os.getenv("REPORTS_API_URL", "").rstrip("/"),
+            profiles_database_url=os.environ["PROFILES_DATABASE_URL"],
             cookie_secure=secure == "true",
         )

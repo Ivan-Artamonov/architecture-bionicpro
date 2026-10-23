@@ -18,26 +18,41 @@ from redis.asyncio import Redis as AsyncRedis
 from app.config import Settings
 from app.main import COOKIE, LOGIN_COOKIE, create_app
 from app.sessions import digest
+from psycopg import connect
 
 
 @pytest.fixture
 def env():
     url = os.getenv("TEST_REDIS_URL")
-    if not url:
-        pytest.skip("Set TEST_REDIS_URL to an isolated Redis instance")
+    profiles_url = os.getenv("TEST_PROFILES_DATABASE_URL")
+    if not url or not profiles_url:
+        pytest.skip("Set TEST_REDIS_URL and TEST_PROFILES_DATABASE_URL to isolated databases")
     prefix = "test-bionicpro:" + secrets.token_hex(8) + ":"
     settings = Settings(client_secret="test-secret", encryption_key=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode(),
                         origin="https://app.test", issuer="https://sso.test/realms/reports-realm",
                         keycloak_internal="http://provider/realms/reports-realm", redis_url=url,
-                        redis_prefix=prefix, api_url="http://reports")
+                        redis_prefix=prefix, api_url="http://reports", profiles_database_url=profiles_url)
     db = Redis.from_url(url, decode_responses=True)
     private = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     jwk = json.loads(jwt.algorithms.RSAAlgorithm.to_jwk(private.public_key()))
     jwk.update(kid="test", use="sig", alg="RS256")
     fake = SimpleNamespace(nonce="", challenge="", refreshes=0, code_exchanges=0, revoke=0,
-                           reject_refresh=False, invalid_nonce=False)
+                           reject_refresh=False, invalid_nonce=False, yandex=False, profile_calls=0,
+                           broker_calls=0, profile_id="12345", profile_error=False)
 
     async def provider(request):
+        if request.url.path.endswith("/broker/yandex/token"):
+            fake.broker_calls += 1
+            assert request.headers["authorization"].startswith("Bearer access-")
+            return httpx.Response(200, json={"access_token": "yandex-secret", "refresh_token": "never-forward"})
+        if request.url.host == "login.yandex.ru":
+            fake.profile_calls += 1
+            assert request.headers["authorization"] == "OAuth yandex-secret"
+            assert dict(request.url.params) == {"format": "json"}
+            return httpx.Response(503 if fake.profile_error else 200, json={
+                "id": fake.profile_id, "login": "ivan", "first_name": "Иван", "last_name": "Иванов",
+                "display_name": "Ivan", "default_email": "ivan@yandex.ru", "birthday": "2000-01-01",
+                "sex": "male", "default_phone": {"number": "+70000000000"}})
         if request.url.host == "reports":
             assert request.headers["authorization"].startswith("Bearer access-")
             assert "cookie" not in request.headers
@@ -61,9 +76,11 @@ def env():
         assert data["redirect_uri"] == settings.callback
         challenge = base64.urlsafe_b64encode(hashlib.sha256(data["code_verifier"].encode()).digest()).decode().rstrip("=")
         assert challenge == fake.challenge
-        claims = {"iss": settings.issuer, "aud": settings.client_id, "sub": "user-id", "iat": int(time.time()),
+        claims = {"iss": settings.issuer, "aud": settings.client_id, "sub": prefix, "iat": int(time.time()),
                   "exp": int(time.time()) + 120, "nonce": "wrong" if fake.invalid_nonce else fake.nonce,
                   "preferred_username": "user1"}
+        if fake.yandex:
+            claims.update(identity_provider="yandex", yandex_id="12345")
         return httpx.Response(200, json={"access_token": "access-initial", "refresh_token": "refresh-initial",
                                         "expires_in": 120, "token_type": "Bearer",
                                         "id_token": jwt.encode(claims, private, algorithm="RS256", headers={"kid": "test"})})
@@ -100,6 +117,8 @@ def env():
     if keys:
         db.delete(*keys)
     db.close()
+    with connect(profiles_url) as profiles:
+        profiles.execute("DELETE FROM yandex_profiles WHERE subject=%s", (prefix,))
 
 
 def test_tokens_stay_server_side_and_cookies_are_secure(env):
@@ -208,3 +227,56 @@ def test_realm_configuration():
     assert otp["requirement"] == "REQUIRED"
     configure = next(a for a in realm["requiredActions"] if a["alias"] == "CONFIGURE_TOTP")
     assert configure["enabled"] and configure["defaultAction"]
+    yandex = next(p for p in realm["identityProviders"] if p["alias"] == "yandex")
+    assert yandex["storeToken"] and yandex["addReadTokenRoleOnCreate"] and not yandex["trustEmail"]
+    broker_otp = flows[yandex["postBrokerLoginFlowAlias"]]["authenticationExecutions"]
+    assert broker_otp[0]["authenticator"] == "auth-otp-form" and broker_otp[0]["requirement"] == "REQUIRED"
+
+
+def consent(env, accepted):
+    session = env.client.get("/api/session").json()
+    return env.client.post("/api/profile/yandex/consent", json={"accepted": accepted},
+                           headers={"Origin": env.settings.origin, "X-CSRF-Token": session["csrf_token"]})
+
+
+def test_yandex_consent_import_and_withdrawal(env):
+    location = env.client.get("/auth/login?provider=yandex", follow_redirects=False).headers["location"]
+    query = parse_qs(urlsplit(location).query)
+    assert query["kc_idp_hint"] == ["yandex"] and query["prompt"] == ["login"]
+    env.fake.yandex = True
+    env.login()
+    assert env.client.get("/api/session").json()["yandex"]["consent"] == "pending"
+    assert env.fake.profile_calls == env.fake.broker_calls == 0
+    assert env.client.post("/api/profile/yandex/consent", json={"accepted": True}).status_code == 403
+    assert consent(env, False).json() == {"consent": "declined", "profile": None}
+    assert env.fake.profile_calls == env.fake.broker_calls == 0
+    response = consent(env, True)
+    assert response.status_code == 200
+    assert response.json()["profile"]["first_name"] == "Иван"
+    assert "birthday" not in response.text and "yandex-secret" not in response.text
+    assert env.fake.profile_calls == env.fake.broker_calls == 1
+    assert env.client.get("/api/session").json()["yandex"] == response.json()
+    with connect(env.settings.profiles_database_url) as db:
+        row = db.execute("SELECT accepted, consent_version, decided_at, profile FROM yandex_profiles WHERE subject=%s",
+                         (env.settings.redis_prefix,)).fetchone()
+        assert row[0] and row[1] == "yandex-profile-v1" and row[2] and row[3] == response.json()["profile"]
+    assert consent(env, False).json() == {"consent": "declined", "profile": None}
+    assert env.client.get("/api/session").json()["yandex"]["profile"] is None
+    assert env.fake.profile_calls == 1
+
+
+def test_yandex_errors_do_not_save_profile_or_lose_rotated_cookie(env):
+    env.fake.yandex = True
+    env.login()
+    env.fake.profile_id = "other-user"
+    assert consent(env, True).status_code == 503
+    assert env.client.get("/api/session").json()["yandex"]["consent"] == "pending"
+    env.fake.profile_id, env.fake.profile_error = "12345", True
+    assert consent(env, True).status_code == 503
+    assert env.client.get("/api/session").json()["yandex"]["consent"] == "pending"
+
+
+def test_local_login_cannot_import_yandex_profile(env):
+    env.login()
+    assert consent(env, True).status_code == 403
+    assert env.fake.profile_calls == env.fake.broker_calls == 0

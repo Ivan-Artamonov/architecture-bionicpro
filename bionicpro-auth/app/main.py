@@ -6,15 +6,22 @@ import httpx
 from cryptography.exceptions import InvalidTag
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response
+from psycopg import Error as DatabaseError
+from pydantic import BaseModel, StrictBool
 from redis.asyncio import Redis
 from redis.exceptions import RedisError
 
 from .config import Settings
 from .oidc import InvalidGrant, OIDC, ProviderError
+from .profiles import Profiles
 from .sessions import InvalidSession, SessionBusy, Sessions
 
 COOKIE = "bionicpro_session"
 LOGIN_COOKIE = "bionicpro_login"
+
+
+class ProfileConsent(BaseModel):
+    accepted: StrictBool
 
 
 def create_app(settings=None, redis_client=None, http_client=None):
@@ -24,10 +31,12 @@ def create_app(settings=None, redis_client=None, http_client=None):
     http = http_client or httpx.AsyncClient(timeout=5, follow_redirects=False, trust_env=False)
     sessions = Sessions(settings, redis)
     oidc = OIDC(settings, http)
+    profiles = Profiles(settings.profiles_database_url)
 
     @asynccontextmanager
     async def lifespan(app):
         await redis.ping()
+        await profiles.initialize()
         yield
         await http.aclose()
         await redis.aclose()
@@ -63,10 +72,12 @@ def create_app(settings=None, redis_client=None, http_client=None):
                 not secrets.compare_digest(request.headers.get("x-csrf-token", "").encode(), record["csrf"].encode())):
             raise HTTPException(403, "CSRF check failed")
 
-    async def authenticate(request):
+    async def authenticate(request, csrf=False):
         if request.headers.get("sec-fetch-site") == "cross-site":
             raise HTTPException(403, "Cross-site request denied")
         async with sessions.locked(request.cookies.get(COOKIE)) as (record, lock):
+            if csrf:
+                check_csrf(request, record)
             if record["expires_at"] <= time.time():
                 try:
                     refresh_token = sessions.unseal(record["refresh_token"], record["id"])
@@ -79,9 +90,11 @@ def create_app(settings=None, redis_client=None, http_client=None):
         return record, sid, ttl
 
     @app.get("/auth/login")
-    async def login():
+    async def login(provider: str | None = None):
+        if provider not in (None, "yandex"):
+            raise HTTPException(400, "Unknown identity provider")
         state, browser, context = await sessions.start_login()
-        response = RedirectResponse(oidc.authorization_url(state, context["nonce"], context["verifier"]), status_code=302)
+        response = RedirectResponse(oidc.authorization_url(state, context["nonce"], context["verifier"], provider), status_code=302)
         cookie(response, LOGIN_COOKIE, browser, 300)
         return response
 
@@ -115,7 +128,28 @@ def create_app(settings=None, redis_client=None, http_client=None):
     @app.get("/api/session")
     async def current_session(request: Request):
         record, sid, ttl = await authenticate(request)
-        response = JSONResponse({"user": record["identity"], "csrf_token": record["csrf"]})
+        try:
+            body = {"user": record["identity"], "csrf_token": record["csrf"]}
+            if record["identity"].get("provider") == "yandex":
+                body["yandex"] = await profiles.status(record["identity"])
+            response = JSONResponse(body)
+        except DatabaseError:
+            response = JSONResponse({"detail": "Profile database unavailable"}, status_code=503)
+        cookie(response, COOKIE, sid, ttl)
+        return response
+
+    @app.post("/api/profile/yandex/consent")
+    async def yandex_consent(request: Request, decision: ProfileConsent):
+        record, sid, ttl = await authenticate(request, csrf=True)
+        if record["identity"].get("provider") != "yandex":
+            response = JSONResponse({"detail": "Yandex login required"}, status_code=403)
+        else:
+            try:
+                result = await profiles.decide(record["identity"], decision.accepted,
+                                               lambda: oidc.yandex_profile(record))
+                response = JSONResponse(result)
+            except (DatabaseError, httpx.RequestError, ProviderError):
+                response = JSONResponse({"detail": "Profile import unavailable; sign in with Yandex again or retry"}, status_code=503)
         cookie(response, COOKIE, sid, ttl)
         return response
 

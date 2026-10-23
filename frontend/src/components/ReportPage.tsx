@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { sessionRequest } from '../api';
 
-type Session = { user: { username: string }; csrf_token: string };
+type YandexProfile = { consent: 'pending' | 'accepted' | 'declined'; profile: Record<string, string> | null };
+type Session = { user: { username: string }; csrf_token: string; yandex?: YandexProfile };
 
 const ReportPage: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -60,6 +61,27 @@ const ReportPage: React.FC = () => {
     }
   };
 
+  const decideProfile = async (accepted: boolean) => {
+    if (!session) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await sessionRequest('/api/profile/yandex/consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': session.csrf_token },
+        body: JSON.stringify({ accepted }),
+      });
+      if (response.status === 401) setSession(null);
+      if (!response.ok) throw new Error('Не удалось сохранить решение. Повторите попытку или войдите через Яндекс заново.');
+      const yandex: YandexProfile = await response.json();
+      setSession(current => current ? { ...current, yandex } : null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка импорта профиля');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!initialized) {
     return <div>Loading...</div>;
   }
@@ -73,6 +95,7 @@ const ReportPage: React.FC = () => {
         >
           Login
         </button>
+        <a href="/auth/login?provider=yandex">Войти через Яндекс ID</a>
         {error && <p role="alert">{error}</p>}
       </div>
     );
@@ -84,6 +107,22 @@ const ReportPage: React.FC = () => {
         <h1 className="text-2xl font-bold mb-6">Usage Reports</h1>
         <p>{session.user.username}</p>
         <button onClick={logout} disabled={loading}>Logout</button>
+        {session.yandex && (
+          <section aria-label="Согласие на использование профиля Яндекса">
+            <p>Разрешить BionicPRO получить из Яндекса и сохранить ID, логин, имя и email
+              для заполнения вашего профиля? Отказ не мешает работе с сервисом.
+              Дата рождения, пол, телефон и фото не сохраняются.</p>
+            <button onClick={() => decideProfile(true)} disabled={loading}>
+              {session.yandex.consent === 'accepted' ? 'Обновить профиль' : 'Разрешить'}
+            </button>
+            <button onClick={() => decideProfile(false)} disabled={loading}>
+              {session.yandex.consent === 'accepted' ? 'Отозвать согласие и удалить профиль' : 'Отказать'}
+            </button>
+            {session.yandex.consent === 'accepted' && <p>Профиль сохранён: {session.yandex.profile?.display_name}
+              {' '}{session.yandex.profile?.default_email}</p>}
+            {session.yandex.consent === 'declined' && <p>Использование профиля запрещено, данные профиля не хранятся.</p>}
+          </section>
+        )}
         
         <button
           onClick={downloadReport}

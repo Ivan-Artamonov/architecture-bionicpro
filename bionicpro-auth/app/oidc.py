@@ -22,13 +22,17 @@ class OIDC:
         self.http = http
         self.endpoint = settings.keycloak_internal + "/protocol/openid-connect"
 
-    def authorization_url(self, state, nonce, verifier):
+    def authorization_url(self, state, nonce, verifier, provider=None):
         challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip("=")
-        return self.settings.issuer + "/protocol/openid-connect/auth?" + urlencode({
+        params = {
             "client_id": self.settings.client_id, "redirect_uri": self.settings.callback,
             "response_type": "code", "scope": "openid profile", "state": state,
             "nonce": nonce, "code_challenge": challenge, "code_challenge_method": "S256",
-        })
+        }
+        if provider:
+            params["kc_idp_hint"] = provider
+            params["prompt"] = "login"  # Do not silently reuse a local-user SSO session for the Yandex button.
+        return self.settings.issuer + "/protocol/openid-connect/auth?" + urlencode(params)
 
     async def tokens(self, **data):
         response = await self.http.post(self.endpoint + "/token", data=data,
@@ -66,8 +70,13 @@ class OIDC:
                 digest = hashlib.sha256(tokens["access_token"].encode()).digest()[:16]
                 if not secrets.compare_digest(claims["at_hash"], base64.urlsafe_b64encode(digest).decode().rstrip("=")):
                     raise ValueError()
-            return {"sub": claims["sub"], "iss": claims["iss"],
-                    "username": claims.get("preferred_username", claims["sub"])}
+            identity = {"sub": claims["sub"], "iss": claims["iss"],
+                        "username": claims.get("preferred_username", claims["sub"])}
+            if claims.get("identity_provider") == "yandex":
+                if not isinstance(claims.get("yandex_id"), str) or not claims["yandex_id"].isdigit():
+                    raise ValueError()
+                identity.update(provider="yandex", yandex_id=claims["yandex_id"])
+            return identity
         except (jwt.PyJWTError, KeyError, TypeError, ValueError, StopIteration, httpx.HTTPStatusError) as error:
             raise ProviderError() from error
 
@@ -77,3 +86,24 @@ class OIDC:
                                         auth=(self.settings.client_id, self.settings.client_secret))
         if response.status_code != 200:
             raise ProviderError()
+
+    async def yandex_profile(self, record):
+        response = await self.http.get(self.settings.keycloak_internal + "/broker/yandex/token",
+                                       headers={"Authorization": "Bearer " + record["access_token"]})
+        if response.status_code != 200:
+            raise ProviderError()
+        try:
+            token = response.json()["access_token"]
+            if not isinstance(token, str) or not token:
+                raise ValueError()
+            response = await self.http.get("https://login.yandex.ru/info", params={"format": "json"},
+                                           headers={"Authorization": "OAuth " + token})
+            if response.status_code != 200:
+                raise ProviderError()
+            profile = response.json()
+            if profile.get("id") != record["identity"]["yandex_id"]:
+                raise ValueError()
+            fields = ("id", "login", "first_name", "last_name", "display_name", "default_email")
+            return {key: value for key in fields if isinstance(value := profile.get(key), str)}
+        except (KeyError, TypeError, ValueError, AttributeError) as error:
+            raise ProviderError() from error
