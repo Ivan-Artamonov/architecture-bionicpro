@@ -3,12 +3,18 @@ import { sessionRequest } from '../api';
 
 type YandexProfile = { consent: 'pending' | 'accepted' | 'declined'; profile: Record<string, string> | null };
 type Session = { user: { username: string }; csrf_token: string; yandex?: YandexProfile };
+type DailyReport = {
+  day: string; prosthesis_id: string; model: string; samples: number;
+  avg_response_ms: number; max_response_ms: number; min_battery_percent: number; successful_movements: number;
+};
+type UsageReport = { period_start: string; period_end: string; prepared_at: string; daily: DailyReport[] };
 
 const ReportPage: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [report, setReport] = useState<UsageReport | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -30,14 +36,19 @@ const ReportPage: React.FC = () => {
       setError(null);
 
       const response = await sessionRequest('/api/reports');
-      if (response.status === 401) setSession(null);
-      if (!response.ok) throw new Error('Отчёт недоступен');
-      const url = URL.createObjectURL(await response.blob());
+      if (response.status === 401) { setSession(null); setReport(null); }
+      if (response.status === 404) throw new Error('Отчёт ещё не подготовлен или учётная запись не привязана в CRM');
+      if (!response.ok) throw new Error('Отчёт недоступен. Повторите попытку позже.');
+      const result: UsageReport = await response.json();
+      setReport(result);
+      const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' }));
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'report.pdf';
+      link.download = 'report.json';
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(url);
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -54,6 +65,7 @@ const ReportPage: React.FC = () => {
       });
       if (!response.ok && response.status !== 401) throw new Error('Не удалось полностью завершить выход');
       setSession(null);
+      setReport(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка выхода');
     } finally {
@@ -131,8 +143,28 @@ const ReportPage: React.FC = () => {
             loading ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
-          {loading ? 'Generating Report...' : 'Download Report'}
+          {loading ? 'Загрузка...' : 'Получить отчёт'}
         </button>
+
+        {report && (
+          <section aria-label="Отчёт о работе протезов">
+            <p>Период UTC: {report.period_start} — {report.period_end}</p>
+            <p>Витрина обновлена: {report.prepared_at}</p>
+            {report.daily.length === 0 ? <p>За этот период телеметрия отсутствует.</p> : (
+              <table>
+                <thead><tr><th>Дата</th><th>Протез</th><th>Замеры</th><th>Средний отклик, мс</th>
+                  <th>Макс. отклик, мс</th><th>Мин. заряд, %</th><th>Успешные движения</th></tr></thead>
+                <tbody>{report.daily.map(row => (
+                  <tr key={`${row.day}-${row.prosthesis_id}`}>
+                    <td>{row.day}</td><td>{row.prosthesis_id} ({row.model})</td><td>{row.samples}</td>
+                    <td>{row.avg_response_ms}</td><td>{row.max_response_ms}</td>
+                    <td>{row.min_battery_percent}</td><td>{row.successful_movements}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            )}
+          </section>
+        )}
 
         {error && (
           <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">

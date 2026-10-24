@@ -1,0 +1,130 @@
+x-airflow: &airflow
+  build: ./airflow
+  environment: &airflow-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD:?Set AIRFLOW_DB_PASSWORD}@airflow-db:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?Set AIRFLOW_FERNET_KEY}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+    AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW_WEBSERVER_SECRET_KEY:?Set AIRFLOW_WEBSERVER_SECRET_KEY}
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "false"
+    CRM_DATABASE_URL: postgresql://etl_reader:${ETL_DB_PASSWORD:?Set ETL_DB_PASSWORD}@report-sources:5432/sources
+    TELEMETRY_DATABASE_URL: postgresql://etl_reader:${ETL_DB_PASSWORD:?Set ETL_DB_PASSWORD}@report-sources:5432/sources
+    CLICKHOUSE_ETL_PASSWORD: ${CLICKHOUSE_ETL_PASSWORD:?Set CLICKHOUSE_ETL_PASSWORD}
+  volumes:
+    - airflow-logs:/opt/airflow/logs
+  depends_on: &airflow-deps
+    airflow-db:
+      condition: service_healthy
+    report-sources:
+      condition: service_healthy
+    clickhouse:
+      condition: service_healthy
+
+services:
+  bionicpro-auth:
+    environment:
+      REPORTS_API_URL: http://reports-api:8000
+    depends_on:
+      reports-api:
+        condition: service_started
+
+  reports-api:
+    build: ./reports-api
+    environment:
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Set CLICKHOUSE_READER_PASSWORD}
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  report-sources:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: sources
+      POSTGRES_USER: sources_admin
+      POSTGRES_PASSWORD: ${SOURCES_DB_PASSWORD:?Set SOURCES_DB_PASSWORD}
+      ETL_DB_PASSWORD: ${ETL_DB_PASSWORD:?Set ETL_DB_PASSWORD}
+    volumes:
+      - report-sources-data:/var/lib/postgresql/data
+      - ./docs/Task2/sources/init.sh:/docker-entrypoint-initdb.d/01-sources.sh:ro
+      - ./docs/Task2/sources/schema.sql:/sources.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sources_admin -d sources"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    environment:
+      CLICKHOUSE_USER: etl
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_ETL_PASSWORD:?Set CLICKHOUSE_ETL_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Set CLICKHOUSE_READER_PASSWORD}
+    volumes:
+      - reports-olap-data:/var/lib/clickhouse
+      - ./docs/Task2/clickhouse/init.sh:/docker-entrypoint-initdb.d/01-reports.sh:ro
+      - ./docs/Task2/clickhouse/schema.sql:/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --user etl --password \"$$CLICKHOUSE_PASSWORD\" --query 'SELECT count() FROM reports.user_reports'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  airflow-db:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_DB: airflow
+      POSTGRES_PASSWORD: ${AIRFLOW_DB_PASSWORD:?Set AIRFLOW_DB_PASSWORD}
+    volumes:
+      - airflow-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  airflow-init:
+    <<: *airflow
+    environment:
+      <<: *airflow-env
+      _AIRFLOW_DB_MIGRATE: "true"
+      _AIRFLOW_WWW_USER_CREATE: "true"
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: ${AIRFLOW_ADMIN_PASSWORD:?Set AIRFLOW_ADMIN_PASSWORD}
+    command: version
+
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+    depends_on:
+      <<: *airflow-deps
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "airflow jobs check --job-type SchedulerJob --local"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+
+  airflow-webserver:
+    <<: *airflow
+    command: webserver
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      <<: *airflow-deps
+      airflow-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  report-sources-data:
+  reports-olap-data:
+  airflow-db-data:
+  airflow-logs:

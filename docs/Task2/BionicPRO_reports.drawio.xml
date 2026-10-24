@@ -1,0 +1,107 @@
+<mxfile host="Electron">
+  <diagram id="reports" name="C4 — отчёты и ETL">
+    <mxGraphModel dx="2191" dy="1149" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="region" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=none;strokeColor=#666666;verticalAlign=bottom;align=left;spacing=15;fontSize=16;" value="" vertex="1">
+          <mxGeometry height="820" width="1490" x="270" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pilot" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6C6477;fontColor=#ffffff;fontSize=16;" value="Пилот протеза" vertex="1">
+          <mxGeometry height="100" width="180" x="30" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;React UI&lt;/b&gt;&lt;br&gt;[Container]&lt;br&gt;Таблица + report.json" vertex="1">
+          <mxGeometry height="100" width="210" x="310" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bff" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;bionicpro-auth&lt;/b&gt;&lt;br&gt;[FastAPI BFF]&lt;br&gt;PKCE, токены на сервере" vertex="1">
+          <mxGeometry height="100" width="230" x="640" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;API отчётов&lt;/b&gt;&lt;br&gt;[FastAPI, отдельный сервис]&lt;br&gt;GET /reports; только свой (iss, sub)" vertex="1">
+          <mxGeometry height="100" width="260" x="1020" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="mart" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#23A2D9;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Витрина user_reports&lt;/b&gt;&lt;br&gt;[ClickHouse / MergeTree]&lt;br&gt;Одна строка на клиента;&lt;br&gt;готовые показатели по дням/протезам" vertex="1">
+          <mxGeometry height="140" width="280" x="1430" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="keycloak" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Keycloak&lt;/b&gt;&lt;br&gt;[Региональный IdP]&lt;br&gt;SSO + обязательный OTP; JWKS" vertex="1">
+          <mxGeometry height="100" width="230" x="640" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="redis" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#23A2D9;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Redis&lt;/b&gt;&lt;br&gt;[Сессии BFF]" vertex="1">
+          <mxGeometry height="100" width="210" x="310" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="staging" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#23A2D9;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Staging + user_reports_next&lt;/b&gt;&lt;br&gt;[ClickHouse, Atomic DB]&lt;br&gt;CRM + сырая телеметрия;&lt;br&gt;JOIN по протезу и периоду владения;&lt;br&gt;агрегация + проверка снимка" vertex="1">
+          <mxGeometry height="150" width="280" x="1430" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="airflow" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Apache Airflow&lt;/b&gt;&lt;br&gt;[LocalExecutor + metadata PostgreSQL]&lt;br&gt;DAG bionicpro_reports, каждый час" vertex="1">
+          <mxGeometry height="130" width="350" x="980" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="chip" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6C6477;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Чип протеза&lt;/b&gt;&lt;br&gt;[ESP32 + датчики]" vertex="1">
+          <mxGeometry height="100" width="180" x="30" y="625" as="geometry" />
+        </mxCell>
+        <mxCell id="ingest" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1061B0;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;Существующий API&lt;/b&gt;&lt;br&gt;[Сбор телеметрии]&lt;br&gt;Приём событий датчиков" vertex="1">
+          <mxGeometry height="100" width="210" x="310" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="telemetry" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#23A2D9;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;DB телеметрии&lt;/b&gt;&lt;br&gt;[PostgreSQL]&lt;br&gt;События: протез, время, отклик, заряд, результат" vertex="1">
+          <mxGeometry height="130" width="250" x="640" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="crm" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#23A2D9;fontColor=#ffffff;fontSize=14;" value="&lt;b&gt;CRM + CRM DB&lt;/b&gt;&lt;br&gt;[Битрикс24; стенд PostgreSQL]&lt;br&gt;История владельцев протезов" vertex="1">
+          <mxGeometry height="130" width="280" x="1440" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="pilot" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="ui" value="Получить отчёт">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="ui" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="bff" value="GET /api/reports&lt;br&gt;HttpOnly cookie">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="bff" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="api" value="GET /reports&lt;br&gt;Bearer access token">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="mart" value="SELECT по (iss, sub)&lt;br&gt;read-only">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="bff" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="keycloak" value="OIDC / PKCE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="bff" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="redis" value="SID + токены">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="755" y="240" />
+              <mxPoint x="415" y="240" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;dashed=1;" target="keycloak" value="Проверка JWT / JWKS">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="360" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="staging" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="mart" value="EXCHANGE TABLES&lt;br&gt;атомарная публикация">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="airflow" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="staging" value="Пакеты → SQL → проверка">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1155" y="530" />
+              <mxPoint x="1570" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="ingest" value="Телеметрия">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="210" y="665" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="ingest" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="telemetry" value="Запись событий">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="telemetry" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="airflow" value="Извлечение&lt;br&gt;read-only">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="crm" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" target="airflow" value="Извлечение&lt;br&gt;read-only">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

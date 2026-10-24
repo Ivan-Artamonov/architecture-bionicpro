@@ -157,13 +157,15 @@ def create_app(settings=None, redis_client=None, http_client=None):
     async def reports(request: Request):
         record, sid, ttl = await authenticate(request)
         response = JSONResponse({"detail": "Reports API is not configured"}, status_code=503)
-        if settings.api_url:
+        if request.query_params:
+            response = JSONResponse({"detail": "Report owner is determined by the session"}, status_code=400)
+        elif settings.api_url:
             try:
                 upstream = await http.get(settings.api_url + "/reports",
                                           headers={"Authorization": "Bearer " + record["access_token"]})
                 if upstream.status_code == 200:
                     response = Response(upstream.content, media_type=upstream.headers.get("content-type", "application/octet-stream"),
-                                        headers={"Content-Disposition": 'attachment; filename="report.pdf"'})
+                                        headers={"Content-Disposition": 'attachment; filename="report.json"'})
                 else:
                     status = upstream.status_code if upstream.status_code in (401, 403, 404) else 502
                     response = JSONResponse({"detail": "Report unavailable"}, status_code=status)

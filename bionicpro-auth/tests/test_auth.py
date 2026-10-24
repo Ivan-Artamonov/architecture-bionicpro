@@ -56,7 +56,7 @@ def env():
         if request.url.host == "reports":
             assert request.headers["authorization"].startswith("Bearer access-")
             assert "cookie" not in request.headers
-            return httpx.Response(200, content=b"%PDF-test", headers={"Content-Type": "application/pdf"})
+            return httpx.Response(200, json={"customer_id": 1, "daily": []})
         if request.url.path.endswith("/certs"):
             return httpx.Response(200, json={"keys": [jwk]})
         assert request.headers["authorization"] == "Basic " + base64.b64encode(b"bionicpro-auth:test-secret").decode()
@@ -156,7 +156,8 @@ def test_refresh_stores_both_new_tokens_and_rotates_sid(env):
     old = env.login()
     env.expire_access(old)
     response = env.client.get("/api/reports")
-    assert response.status_code == 200 and response.content == b"%PDF-test"
+    assert response.status_code == 200 and response.json() == {"customer_id": 1, "daily": []}
+    assert response.headers["content-disposition"] == 'attachment; filename="report.json"'
     new = env.client.cookies.get(COOKIE)
     assert new != old and env.fake.refreshes == 1
     _, record = env.record(new)
@@ -164,6 +165,8 @@ def test_refresh_stores_both_new_tokens_and_rotates_sid(env):
     from app.sessions import Sessions
     store = Sessions(env.settings, None)
     assert store.unseal(record["refresh_token"], record["id"]) == "refresh-rotated"
+    denied = env.client.get("/api/reports?customer_id=2")
+    assert denied.status_code == 400 and env.client.cookies.get(COOKIE) != new
 
 
 def test_revoked_refresh_token_ends_session(env):
