@@ -1,0 +1,136 @@
+# Use with the base Compose only; replaces the Task2/Task3 reporting stack.
+services:
+  bionicpro-auth:
+    environment:
+      REPORTS_API_URL: http://reports-api:8000
+    depends_on:
+      reports-api:
+        condition: service_started
+
+  reports-api:
+    build: ./reports-api
+    environment:
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Set CLICKHOUSE_READER_PASSWORD}
+      REPORTS_TABLE: user_reports_cdc
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  report-sources:
+    image: postgres:14
+    command: [postgres, -c, wal_level=logical, -c, max_replication_slots=4, -c, max_wal_senders=4, -c, max_slot_wal_keep_size=2GB]
+    environment:
+      POSTGRES_DB: sources
+      POSTGRES_USER: sources_admin
+      POSTGRES_PASSWORD: ${SOURCES_DB_PASSWORD:?Set SOURCES_DB_PASSWORD}
+      ETL_DB_PASSWORD: ${ETL_DB_PASSWORD:?Set ETL_DB_PASSWORD}
+      CDC_DB_PASSWORD: ${CDC_DB_PASSWORD:?Set CDC_DB_PASSWORD}
+    volumes:
+      - cdc-sources-data:/var/lib/postgresql/data
+      - ./docs/Task4/postgres/init.sh:/docker-entrypoint-initdb.d/01-sources.sh:ro
+      - ./docs/Task2/sources/schema.sql:/sources.sql:ro
+      - ./docs/Task4/postgres/cdc.sql:/cdc.sql:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U sources_admin -d sources']
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  kafka:
+    image: apache/kafka:3.8.0
+    environment:
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - cdc-kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: [CMD-SHELL, '/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null']
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  kafka-init:
+    image: apache/kafka:3.8.0
+    entrypoint: [/bin/bash, /init-topics.sh]
+    volumes:
+      - ./docs/Task4/kafka/init-topics.sh:/init-topics.sh:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  debezium:
+    image: quay.io/debezium/connect:2.7.3.Final
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: bionicpro-cdc
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE: 'false'
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: 'false'
+      CONNECT_CONFIG_PROVIDERS: env
+      CONNECT_CONFIG_PROVIDERS_ENV_CLASS: org.apache.kafka.common.config.provider.EnvVarConfigProvider
+      CDC_DB_PASSWORD: ${CDC_DB_PASSWORD:?Set CDC_DB_PASSWORD}
+      HEAP_OPTS: -Xms256m -Xmx512m
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      report-sources:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://localhost:8083/]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  connector-init:
+    image: curlimages/curl:8.12.1
+    command: [--fail-with-body, --silent, --show-error, -X, PUT, -H, 'Content-Type: application/json', --data-binary, '@/connector.json', 'http://debezium:8083/connectors/bionicpro/config']
+    volumes:
+      - ./docs/Task4/debezium/connector.json:/connector.json:ro
+    depends_on:
+      debezium:
+        condition: service_healthy
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    environment:
+      CLICKHOUSE_USER: etl
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_ETL_PASSWORD:?Set CLICKHOUSE_ETL_PASSWORD}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: '1'
+      CLICKHOUSE_READER_PASSWORD: ${CLICKHOUSE_READER_PASSWORD:?Set CLICKHOUSE_READER_PASSWORD}
+    volumes:
+      - cdc-olap-data:/var/lib/clickhouse
+      - ./docs/Task4/clickhouse/init.sh:/docker-entrypoint-initdb.d/01-cdc.sh:ro
+      - ./docs/Task4/clickhouse/schema.sql:/schema.sql:ro
+      - ./docs/Task4/clickhouse/kafka.xml:/etc/clickhouse-server/config.d/kafka.xml:ro
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD-SHELL, 'clickhouse-client --user etl --password "$$CLICKHOUSE_PASSWORD" --query "SELECT count() FROM reports.user_reports_cdc"']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+volumes:
+  cdc-sources-data:
+  cdc-kafka-data:
+  cdc-olap-data:

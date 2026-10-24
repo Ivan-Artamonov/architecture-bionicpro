@@ -26,6 +26,11 @@ class Settings:
 
 
 class Reports:
+    def __init__(self):
+        self.table = os.getenv("REPORTS_TABLE", "user_reports")
+        if self.table not in ("user_reports", "user_reports_cdc"):
+            raise ValueError("Unsupported reports table")
+
     def get(self, issuer, subject):
         with clickhouse_connect.get_client(
             host=os.getenv("CLICKHOUSE_HOST", "clickhouse"),
@@ -36,7 +41,7 @@ class Reports:
         ) as client:
             rows = client.query(
                 "SELECT customer_id, period_start, period_end, prepared_at, daily, snapshot_id "
-                "FROM user_reports WHERE issuer={issuer:String} AND subject={subject:String} LIMIT 1",
+                f"FROM {self.table} WHERE issuer={{issuer:String}} AND subject={{subject:String}} LIMIT 1",
                 parameters={"issuer": issuer, "subject": subject},
             ).result_rows
         if not rows:
