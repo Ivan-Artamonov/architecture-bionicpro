@@ -76,7 +76,7 @@ def test_storage_uses_bound_identity_and_preserves_named_metrics(monkeypatch):
     def query(sql, parameters):
         assert "issuer={issuer:String} AND subject={subject:String}" in sql
         assert parameters == {"issuer": "trusted-issuer", "subject": "alice' OR 1=1"}
-        return SimpleNamespace(result_rows=[(1, date(2026, 9, 23), datetime(2026, 10, 23), datetime(2026, 10, 23), daily)])
+        return SimpleNamespace(result_rows=[(1, date(2026, 9, 23), datetime(2026, 10, 23), datetime(2026, 10, 23), daily, "snapshot")])
 
     monkeypatch.setenv("CLICKHOUSE_READER_PASSWORD", "test-password")
     monkeypatch.setattr("app.main.clickhouse_connect.get_client", lambda **kwargs: nullcontext(SimpleNamespace(query=query)))

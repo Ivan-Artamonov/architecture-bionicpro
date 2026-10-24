@@ -3,3 +3,4 @@ starlette==1.9.0
 uvicorn==0.54.0
 PyJWT[crypto]==2.15.1
 clickhouse-connect==0.8.18
+boto3==1.37.38

@@ -5,9 +5,12 @@ from datetime import timezone
 import clickhouse_connect
 import jwt
 from clickhouse_connect.driver.exceptions import ClickHouseError
-from fastapi import Depends, FastAPI, HTTPException, Request
+from botocore.exceptions import BotoCoreError, ClientError
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import PyJWKClient, PyJWKClientConnectionError
+
+from app.cache import ReportCache, SnapshotChanged
 
 
 @dataclass
@@ -32,22 +35,23 @@ class Reports:
             database="reports", connect_timeout=3, send_receive_timeout=5,
         ) as client:
             rows = client.query(
-                "SELECT customer_id, period_start, period_end, prepared_at, daily "
+                "SELECT customer_id, period_start, period_end, prepared_at, daily, snapshot_id "
                 "FROM user_reports WHERE issuer={issuer:String} AND subject={subject:String} LIMIT 1",
                 parameters={"issuer": issuer, "subject": subject},
             ).result_rows
         if not rows:
             return None
-        customer, start, end, prepared, daily = rows[0]
+        customer, start, end, prepared, daily, snapshot = rows[0]
         # clickhouse-connect decodes named Tuple elements as dictionaries.
         return {"customer_id": customer, "period_start": start, "period_end": end.replace(tzinfo=timezone.utc),
-                "prepared_at": prepared.replace(tzinfo=timezone.utc), "daily": daily}
+                "prepared_at": prepared.replace(tzinfo=timezone.utc), "daily": daily, "snapshot_id": snapshot}
 
 
-def create_app(settings=None, reports=None, keys=None):
+def create_app(settings=None, reports=None, keys=None, cache=None):
     settings = settings or Settings.from_env()
     reports = reports or Reports()
     keys = keys or PyJWKClient(settings.jwks_url, lifespan=300, timeout=3)
+    cache = cache or (ReportCache() if os.getenv("S3_ENDPOINT_URL") else None)
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     bearer = HTTPBearer(auto_error=False)
 
@@ -81,12 +85,29 @@ def create_app(settings=None, reports=None, keys=None):
         if request.query_params:
             raise HTTPException(400, "Report owner is determined by the access token")
         try:
-            report = reports.get(claims["iss"], claims["sub"])
-        except (ClickHouseError, OSError):
+            if cache:
+                report = cache.get(claims["iss"], claims["sub"], reports)
+            else:
+                report = reports.get(claims["iss"], claims["sub"])
+        except SnapshotChanged:
+            raise HTTPException(503, "Report snapshot is being published; retry", headers={"Retry-After": "2"})
+        except (ClickHouseError, BotoCoreError, ClientError, OSError, ValueError, KeyError):
             raise HTTPException(503, "Report storage unavailable")
         if report is None:
             raise HTTPException(404, "Report not prepared or customer not linked in CRM")
         return report
+
+    @app.get("/cdn-authorize")
+    def cdn_authorize(request: Request):
+        if not cache:
+            raise HTTPException(403, "CDN is not configured")
+        try:
+            origin = cache.origin(request.headers.get("X-Original-URI", ""))
+        except (jwt.PyJWTError, ValueError, TypeError, KeyError):
+            raise HTTPException(403, "Invalid or expired report link")
+        except (BotoCoreError, ClientError):
+            raise HTTPException(503, "Object storage unavailable")
+        return Response(status_code=204, headers={"X-Origin-URL": origin})
 
     @app.get("/health")
     def health():

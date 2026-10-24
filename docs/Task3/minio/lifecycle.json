@@ -1,0 +1,5 @@
+{
+  "Rules": [
+    {"ID": "reports-7d", "Status": "Enabled", "Filter": {"Prefix": "reports/"}, "Expiration": {"Days": 7}}
+  ]
+}

@@ -39,7 +39,14 @@ const ReportPage: React.FC = () => {
       if (response.status === 401) { setSession(null); setReport(null); }
       if (response.status === 404) throw new Error('Отчёт ещё не подготовлен или учётная запись не привязана в CRM');
       if (!response.ok) throw new Error('Отчёт недоступен. Повторите попытку позже.');
-      const result: UsageReport = await response.json();
+      const payload = await response.json();
+      // Task3 возвращает CDN-ссылку, Task2 — сам отчёт.
+      let result: UsageReport = payload;
+      if (payload.url) {
+        const file = await fetch(payload.url, { credentials: 'omit', cache: 'no-store', referrerPolicy: 'no-referrer' });
+        if (!file.ok) throw new Error('Ссылка на отчёт недоступна. Запросите отчёт ещё раз.');
+        result = await file.json();
+      }
       setReport(result);
       const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' }));
       const link = document.createElement('a');

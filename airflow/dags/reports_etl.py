@@ -1,10 +1,13 @@
 import hashlib
+import json
 import os
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import clickhouse_connect
+import boto3
+from botocore.config import Config
 import psycopg2
 from airflow import DAG
 from airflow.operators.python import PythonOperator, get_current_context
@@ -84,14 +87,24 @@ def build_mart():
 def publish():
     bounds = interval()
     with warehouse() as target:
-        # A retry after a successful EXCHANGE must not swap the old snapshot back into production.
-        if target.command("SELECT count() FROM reports.user_reports WHERE snapshot_id={snapshot:String}", parameters=bounds):
-            return
-        if target.command("SELECT count() FROM reports.user_reports WHERE period_end > {end:DateTime}", parameters=bounds):
-            raise ValueError("Cannot replace a newer published snapshot with an older interval")
-        if not target.command("SELECT count() FROM reports.user_reports_next WHERE snapshot_id={snapshot:String}", parameters=bounds):
-            raise ValueError("Prepared snapshot not found")
-        target.command("EXCHANGE TABLES reports.user_reports AND reports.user_reports_next")
+        # Повтор задачи не должен вернуть старую витрину.
+        if not target.command("SELECT count() FROM reports.user_reports WHERE snapshot_id={snapshot:String}", parameters=bounds):
+            if target.command("SELECT count() FROM reports.user_reports WHERE period_end > {end:DateTime}", parameters=bounds):
+                raise ValueError("Cannot replace a newer published snapshot with an older interval")
+            if not target.command("SELECT count() FROM reports.user_reports_next WHERE snapshot_id={snapshot:String}", parameters=bounds):
+                raise ValueError("Prepared snapshot not found")
+            target.command("EXCHANGE TABLES reports.user_reports AND reports.user_reports_next")
+    # При повторе задачи восстанавливаем маркер, даже если EXCHANGE уже выполнен.
+    if os.getenv("S3_ENDPOINT_URL"):
+        s3 = boto3.client(
+            "s3", endpoint_url=os.environ["S3_ENDPOINT_URL"], region_name="us-east-1",
+            aws_access_key_id=os.environ["S3_ACCESS_KEY"], aws_secret_access_key=os.environ["S3_SECRET_KEY"],
+            config=Config(signature_version="s3v4", s3={"addressing_style": "path"},
+                          connect_timeout=3, read_timeout=5, retries={"max_attempts": 2}),
+        )
+        s3.put_object(Bucket=os.getenv("S3_BUCKET", "reports"), Key="metadata/current.json",
+                      Body=json.dumps({"snapshot_id": bounds["snapshot"]}).encode(),
+                      ContentType="application/json", CacheControl="no-store")
 
 
 with DAG(
