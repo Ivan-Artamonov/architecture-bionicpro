@@ -1,0 +1,7 @@
+prosthesis_id,event_time,reaction_time_ms,battery_level,signal_quality
+prosthesis-001,2025-01-01T10:00:00,80,95,0.92
+prosthesis-001,2025-01-01T12:00:00,120,90,0.88
+prosthesis-001,2025-01-02T10:00:00,70,85,0.95
+prosthesis-002,2025-01-01T11:00:00,95,80,0.83
+prosthesis-002,2025-01-02T11:00:00,110,75,0.81
+prosthesis-003,2025-01-01T09:00:00,60,98,0.97
